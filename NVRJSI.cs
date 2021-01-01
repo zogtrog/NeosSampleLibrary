@@ -117,6 +117,8 @@ namespace JINT4NEOS
 
         public readonly Sync<TypeOnOverFlow> Output_Overflow_Mode;
         public readonly Sync<int> MaxOutputQue;
+        public readonly Sync<uint> MaxNoOfInstructions;
+        public readonly Sync<ushort> MaxMemoryKB;
         //public readonly Sync<bool> JSON_OUTPUT_READY;
         public readonly Sync<string> JSON_OUTPUT;
         public readonly Sync<string> LastError;
@@ -178,6 +180,8 @@ namespace JINT4NEOS
             JSON_INPUT_PUSH_TRIGGER.Value = false;
             Run_Trigger.Value = false;
             JSON_OUTPUT_READY.Value = false;
+            MaxNoOfInstructions.Value = 20000;
+            MaxMemoryKB.Value = 1024;
         }
 
         private void JSError(System.Object e)
@@ -230,6 +234,8 @@ namespace JINT4NEOS
             if (Enabled)
             {
                     int mv = MaxOutputQue.Value;
+                    uint max_mem = 1024 * 1024;
+                    uint max_lines = 20000;
                     if(mv >10000)
                     {
                         mv = 10000;
@@ -245,7 +251,16 @@ namespace JINT4NEOS
 
                     prog = JSHelper.NoNullString(MyJavaScript.Value);
                     sp = JSHelper.NoNullString(JSON_InitialParameters.Value,"{}");
-                     myJSP = new JSP(prog, sp, Elog, JSError);
+                    if (!JSHelper.IsNull(MaxMemoryKB.Value))
+                    {
+                        max_mem = 1024 * (uint)MaxMemoryKB.Value;
+                    }
+        
+                    if(!JSHelper.IsNull(MaxNoOfInstructions.Value))
+                    {
+                    max_lines = MaxNoOfInstructions.Value;
+                     }
+                     myJSP = new JSP(prog, sp, Elog, JSError,max_mem,max_lines);
                      myJSP.MaxResults = mv;
                     myJSP.results_overflow_option = Output_Overflow_Mode.Value;
                      JSON_OUTPUT_READY.Value = false;

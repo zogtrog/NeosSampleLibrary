@@ -94,6 +94,11 @@ namespace JASP
             return (string)z;
         }
 
+        public static bool IsNull(System.Object testobj)
+        {
+            return (testobj == null);
+        }
+
         public static string Bracket(string ips, char lb, char rb)
         {
             return lb + ips + rb;
@@ -420,7 +425,7 @@ namespace JASP
             return s;
         }
 
-        private void RunJavaScript(Object JSONObj)
+        private void RunJavaScript(Object JSONObj,int MaxStatements = 20000)
         {
             //var rc = optio
 
@@ -443,7 +448,10 @@ namespace JASP
                      //DO NOT USE THE LIMIT MEMORY OPTION INSIDE NEOSVR or UNITY as it is not supported and the program won't run!!!
                      //Probably best to use stack size on thread instead
                      //options.LimitMemory(max_mem);  
-                     options.MaxStatements(20000);
+                     if (MaxStatements > 0)
+                     {
+                         options.MaxStatements(MaxStatements);
+                     }
                      options.CancellationToken(ctoken);
                  })
                  .SetValue("report", new Action<object>(eHandler))
